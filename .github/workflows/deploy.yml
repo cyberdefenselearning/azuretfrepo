@@ -15,11 +15,12 @@ jobs:
     name: "Terraform Build & Deploy"
     runs-on: ubuntu-latest
 
+    # Map your GitHub Secrets to the environment variables Terraform expects
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_USE_OIDC: "true"
+      ARM_CLIENT_SECRET: ${{ secrets.TERRAFORM_CI }}   # <--- Updated to match your secret name!
 
     steps:
       - name: Checkout Code
@@ -29,6 +30,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
+          terraform_wrapper: false                     # Prevents CLI stdout hangs
 
       - name: Terraform Init
         run: terraform init
