@@ -6,12 +6,13 @@ terraform {
       version = "~> 3.0"
     }
   }
-  # Store state in Azure Blob Storage
+
   backend "azurerm" {
     resource_group_name  = "rg-tfstate"
     storage_account_name = "sttfstateyourorg123"
     container_name       = "tfstate"
     key                  = "infrastructure.tfstate"
+    use_azuread_auth     = true   # <--- Bypasses listKeys requirement!
   }
 }
 
