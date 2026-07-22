@@ -1,0 +1,41 @@
+stages:
+  - validate
+  - plan
+  - apply
+
+# Use the official HashiCorp Terraform Docker image
+image:
+  name: hashicorp/terraform:latest
+  entrypoint: [""]
+
+# Run 'terraform init' before any stage executes
+before_script:
+  - terraform init
+
+# Stage 1: Validate code syntax
+validate:
+  stage: validate
+  script:
+    - terraform validate
+
+# Stage 2: Calculate diffs and generate plan artifact
+plan:
+  stage: plan
+  script:
+    - terraform plan -out=tfplan
+  artifacts:
+    name: "tfplan-$CI_COMMIT_SHA"
+    paths:
+      - tfplan
+    expire_in: 1 week
+
+# Stage 3: Apply changes to Azure (Requires manual click in GitLab UI for production safety)
+apply:
+  stage: apply
+  script:
+    - terraform apply -auto-approve tfplan
+  dependencies:
+    - plan
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual  # Gives you a "Play" button in GitLab to safely approve deployments!
